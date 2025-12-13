@@ -79,5 +79,26 @@ class DatabaseManager:
     result = cursor.fetchone()
     conn.close
     return result
-
+  def add_password(self, username, website, enc_username, enc_password):
+        conn = self._connect()
+        cursor = conn.cursor()
+        
+        query = """INSERT INTO vault (user_id, website, site_username, site_password) 
+                   VALUES (?, ?, ?, ?)"""
+        
+        cursor.execute(query, (username, website, enc_username, enc_password))
+        conn.commit()
+        conn.close()
+        print(f"Saved password for {website}.")
+  # Paste this INSIDE the DatabaseManager class
+  def get_passwords(self, username):
+        conn = self._connect() # Connect to DB
+        cursor = conn.cursor()
+        
+        # We fetch ID, Website, and the Encrypted Data
+        query = "SELECT id, website, site_username, site_password FROM vault WHERE user_id = ?"        
+        cursor.execute(query, (username,))
+        results = cursor.fetchall() # Get all rows
+        conn.close()
+        return results
 
