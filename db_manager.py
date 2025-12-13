@@ -69,7 +69,16 @@ class DatabaseManager:
     finally:
       # Always close connection, even if error happens
       conn.close() 
-      
+  
+  def get_user(self, username):
+    conn=self._connect()
+    cursor=conn.cursor()
+    
+    query = "SELECT auth_hash,salt_auth,salt_enc FROM users WHERE username=?"
+    cursor.execute(query,(username,))
+    result = cursor.fetchone()
+    conn.close
+    return result
 
 # This block only runs if the file is executed directly (not imported)
 if __name__ == "__main__":
