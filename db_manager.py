@@ -80,9 +80,4 @@ class DatabaseManager:
     conn.close
     return result
 
-# This block only runs if the file is executed directly (not imported)
-if __name__ == "__main__":
-    db = DatabaseManager()   # Create database + tables automatically
-    
-    # Test add_user → You can comment after first run to avoid duplicates
-    db.add_user("test_user", "fake_hash", b'salt1', b'salt2')
+

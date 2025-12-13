@@ -1,6 +1,8 @@
 import os
+import base64
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
 class CryptoManager:
   def __init__(self):
@@ -30,12 +32,30 @@ class CryptoManager:
     authkey=auth.derive(password)
     enckey=enc.derive(password)
     return(authkey.hex(),enckey)
-    
-    
+  
+  def encrypt(self, data, key):
+    data_bytes = data.encode('utf-8')
+    nonce=os.urandom(12)
+    aesgcm = AESGCM(key)
+    ciphertext = aesgcm.encrypt(nonce,data_bytes,None)
+    return base64.b64encode(nonce+ciphertext).decode('utf-8')
+  
+  def decrypt(self,encrypted_string,key):
+    nonce = base64.b64decode(encrypted_string)[:12]
+    ciphertext = base64.b64decode(encrypted_string)[12:]
+    aesgcm = AESGCM(key)
+    plaintext = aesgcm.decrypt(nonce,ciphertext,None)
+    return plaintext.decode('utf-8')
+
+
 if __name__ == "__main__":
     cm = CryptoManager()
-    s1 = cm.generate_salt()
-    s2 = cm.generate_salt()
-    a_hash, e_key = cm.derive_keys("testpass", s1, s2)
-    print(f"Auth: {a_hash}")
-    print(f"Key: {e_key.hex()}")
+    # Fake a key for testing (32 bytes)
+    fake_key = os.urandom(32) 
+
+    secret = "My Super Secret Password"
+    encrypted = cm.encrypt(secret, fake_key)
+    print(f"Encrypted: {encrypted}")
+
+    decrypted = cm.decrypt(encrypted, fake_key)
+    print(f"Decrypted: {decrypted}")
