@@ -1,4 +1,3 @@
-from key_generator import auth_hash, salt_auth, salt_enc
 import sqlite3
 
 # A class that manages everything related to the SQLite database:
