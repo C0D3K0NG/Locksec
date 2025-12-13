@@ -2,3 +2,5 @@ cryptography
 pyperclip
 requests
 pynput
+pyotp
+qrcode

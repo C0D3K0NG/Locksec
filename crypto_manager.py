@@ -12,6 +12,9 @@ class CryptoManager:
   def generate_salt(self):
     return os.urandom(16)
   
+  def generate_mek(self):
+    os.urandom(32)
+    
   def derive_keys(self,password,salt_auth,salt_enc):
     password=password.encode('utf-8')
     # Salt for Authentication
@@ -40,12 +43,26 @@ class CryptoManager:
     ciphertext = aesgcm.encrypt(nonce,data_bytes,None)
     return base64.b64encode(nonce+ciphertext).decode('utf-8')
   
-  def decrypt(self,encrypted_string,key):
+  def decrypt(self,encrypted_string,key,return_bytes=False):
     nonce = base64.b64decode(encrypted_string)[:12]
     ciphertext = base64.b64decode(encrypted_string)[12:]
     aesgcm = AESGCM(key)
     plaintext = aesgcm.decrypt(nonce,ciphertext,None)
-    return plaintext.decode('utf-8')
+    if return_bytes:
+      return plaintext # Returns b'\xfa...'
+    else:
+      return plaintext.decode('utf-8')
+  
+  def encrypt(self, data, key):
+    if isinstance(data,bytes):
+      data_bytes = data
+    else:
+      data_bytes = data.encode('utf-8')
+    nonce=os.urandom(12)
+    aesgcm = AESGCM(key)
+    ciphertext = aesgcm.encrypt(nonce,data_bytes,None)
+    return base64.b64encode(nonce+ciphertext).decode('utf-8')
+
 
 
 if __name__ == "__main__":
