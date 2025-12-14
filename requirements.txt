@@ -4,3 +4,4 @@ requests
 pynput
 pyotp
 qrcode
+pymupdf

@@ -27,7 +27,10 @@ class DatabaseManager:
       auth_hash TEXT NOT NULL,        -- PBKDF2-derived authentication hash
       salt_auth BLOB NOT NULL,        -- Salt used to create auth key
       salt_enc BLOB NOT NULL,         -- Salt used to create encryption key
-      recovery_key BLOB               -- Optional password recovery data
+      wrapped_mek TEXT,               -- Box A (Locked by Password)
+      rescue_key TEXT,                -- Box B (Locked by Rescue Code)
+      totp_secret TEXT                -- For Authenticator App
+      
     )
     ''')
 
@@ -48,17 +51,17 @@ class DatabaseManager:
     conn.close()   # Close connection to avoid memory leaks
     pass
   
-  def add_user(self, username, auth_hash, salt_auth, salt_enc):
+  def add_user(self, username, auth_hash, salt_auth, salt_enc,wrapped_mek,resue_key,totp_secret):
     # Add a new user into the "users" table
     conn = self._connect()
     cursor = conn.cursor()
     
     # SQL query with ? placeholders → prevents SQL injection attacks
-    query = '''INSERT INTO users(username, auth_hash, salt_auth, salt_enc) VALUES (?, ?, ?, ?)'''
+    query = '''INSERT INTO users(username, auth_hash, salt_auth, salt_enc,wrapped_mek,resue_key,totp_secret) VALUES (?, ?, ?, ?,?,?,?)'''
     
     try:
       # Insert the user into the table
-      cursor.execute(query, (username, auth_hash, salt_auth, salt_enc))
+      cursor.execute(query, (username, auth_hash, salt_auth, salt_enc,wrapped_mek,resue_key,totp_secret))
       conn.commit()  # Save the new user to the database
       print(f"User {username} registered successfully.\n")
     
